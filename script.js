@@ -55,15 +55,31 @@ if (galleryGrid) {
         "775777922_122206181906522069_4888525804245585400_n.jpg",
         "776224173_122206181912522069_6743661842256168313_n.jpg",
         "778157290_122206182062522069_1503381917274966401_n.jpg",
-        "784619414_122207083520522069_7546756460447288121_n.jpg",
-        "IMG_0339-2048x1152.jpg"
+        "IMG_0339-2048x1152.jpg",
+        "WhatsApp Image 2026-08-29 at 01.08.01.jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.01 (1).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.01 (2).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.01 (3).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.02.jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.02 (1).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.02 (2).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.02 (3).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.02 (4).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.03.jpeg",
+        "WhatsApp Image 2026-08-29 at 01.08.03 (1).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.49.jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.49 (1).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.49 (2).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.49 (3).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.49 (4).jpeg",
+        "WhatsApp Image 2026-08-29 at 01.09.50.jpeg"
   ];
 
   galleryGrid.innerHTML = galleryPhotos
     .map(
       (file) => `
         <figure class="photo-card">
-          <img src="assets/gallery/${file}" alt="The Istirit Band live" loading="lazy" />
+          <img src="assets/gallery/${encodeURIComponent(file)}" alt="The Istirit Band live" loading="lazy" />
         </figure>`
     )
     .join('');
@@ -74,22 +90,18 @@ if (posterGrid) {
   const posterPhotos = [
         "510530437_122157271058522069_8457401580208111734_n.jpg",
         "666884388_122193415244522069_8525446735865513744_n.jpg",
-        "669010311_122193741368522069_3071499442592199426_n.jpg",
-        "672672775_122194092524522069_987557992113205395_n.jpg",
         "678930003_122194795598522069_4347792233601542783_n.jpg",
         "702589525_122197657178522069_2508819526418245430_n.jpg",
-        "703861553_122197899908522069_8364916308118040163_n.jpg",
         "749161388_122203276508522069_8226494373518000257_n.jpg",
-        "751321367_122203719680522069_5769015711003384035_n.jpg",
-        "752334389_122203718660522069_5156938392721014491_n.jpg",
-        "767301367_122205383834522069_5565059019757970901_n.jpg"
+        "767301367_122205383834522069_5565059019757970901_n (1).jpg",
+        "784619414_122207083520522069_7546756460447288121_n.jpg"
   ];
 
   posterGrid.innerHTML = posterPhotos
     .map(
       (file) => `
         <figure class="photo-card">
-          <img src="assets/gallery/${file}" alt="Locandina concerto The Istirit Band" loading="lazy" />
+          <img src="assets/locandine/${encodeURIComponent(file)}" alt="Locandina concerto The Istirit Band" loading="lazy" />
         </figure>`
     )
     .join('');
@@ -123,6 +135,76 @@ if (lightbox && lightboxImg && lightboxClose) {
     if (event.key === 'Escape') {
       closeLightbox();
     }
+  });
+}
+
+// --- Musica di sottofondo continua tra le pagine ---
+const siteAudio = document.getElementById('siteAudio');
+const audioToggle = document.getElementById('audioToggle');
+
+if (siteAudio && audioToggle) {
+  const STATE_KEY = 'istiritAudioState'; // 'playing' | 'paused'
+  const TIME_KEY = 'istiritAudioTime';
+
+  const savedTime = parseFloat(sessionStorage.getItem(TIME_KEY) || '0');
+  const savedState = sessionStorage.getItem(STATE_KEY);
+  // Di default, dopo la prima interazione dell'utente, la musica riparte da sola.
+  const shouldPlay = savedState === 'playing';
+
+  const setToggleUI = (isPlaying) => {
+    audioToggle.classList.toggle('is-playing', isPlaying);
+    audioToggle.setAttribute('aria-pressed', String(isPlaying));
+    audioToggle.title = isPlaying ? 'Disattiva musica' : 'Attiva musica';
+  };
+
+  const restoreTime = () => {
+    if (savedTime > 0 && Number.isFinite(savedTime)) {
+      try {
+        siteAudio.currentTime = savedTime;
+      } catch (err) {
+        /* ignora se non ancora seekable */
+      }
+    }
+  };
+
+  if (siteAudio.readyState >= 1) {
+    restoreTime();
+  } else {
+    siteAudio.addEventListener('loadedmetadata', restoreTime, { once: true });
+  }
+
+  if (shouldPlay) {
+    const tryPlay = () => {
+      siteAudio.play().then(() => setToggleUI(true)).catch(() => setToggleUI(false));
+    };
+    tryPlay();
+  } else {
+    setToggleUI(false);
+  }
+
+  audioToggle.addEventListener('click', () => {
+    if (siteAudio.paused) {
+      siteAudio.play()
+        .then(() => {
+          setToggleUI(true);
+          sessionStorage.setItem(STATE_KEY, 'playing');
+        })
+        .catch(() => setToggleUI(false));
+    } else {
+      siteAudio.pause();
+      setToggleUI(false);
+      sessionStorage.setItem(STATE_KEY, 'paused');
+    }
+  });
+
+  // Salva continuamente la posizione così il cambio pagina riprende da lì.
+  siteAudio.addEventListener('timeupdate', () => {
+    sessionStorage.setItem(TIME_KEY, String(siteAudio.currentTime));
+  });
+
+  window.addEventListener('pagehide', () => {
+    sessionStorage.setItem(TIME_KEY, String(siteAudio.currentTime));
+    sessionStorage.setItem(STATE_KEY, siteAudio.paused ? 'paused' : 'playing');
   });
 }
 
