@@ -147,8 +147,8 @@ p {
 .brand-mark {
     display: inline-grid;
     place-items: center;
-    width: 96px;
-    height: 96px;
+    width: clamp(52px, 10vh, 96px);
+    height: clamp(52px, 10vh, 96px);
     object-fit: contain;
     flex-shrink: 0;
 }
@@ -169,12 +169,12 @@ p {
 }
 
 .brand-text strong {
-    font-size: 1.3rem;
+    font-size: clamp(0.95rem, 3.2vw, 1.3rem);
 }
 
 .brand-text small {
     color: var(--gold);
-    font-size: 0.9rem;
+    font-size: clamp(0.65rem, 2.2vw, 0.9rem);
 }
 
 .site-nav {
@@ -998,5 +998,28 @@ p {
 
     .hero {
         min-height: 620px;
+    }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .nav-wrap {
+        height: 64px;
+    }
+
+    .brand {
+        gap: 0.6rem;
+    }
+
+    .brand-mark {
+        width: clamp(36px, 9vh, 52px);
+        height: clamp(36px, 9vh, 52px);
+    }
+
+    .brand-text strong {
+        font-size: clamp(0.8rem, 3vh, 1rem);
+    }
+
+    .brand-text small {
+        font-size: clamp(0.6rem, 2.2vh, 0.75rem);
     }
 }
